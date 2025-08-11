@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIU Calculators</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Applying the Inter font to the body */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for input number to hide arrows */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Styles for active and inactive tabs */
+        .tab-btn.active {
+            background-color: #F97316; /* orange-500 */
+            color: white;
+        }
+        .tab-btn {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        /* Hide content panels by default */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .previous-grade-container {
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-lg mx-auto bg-white rounded-2xl shadow-lg">
+        
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-gray-200">
+            <button id="tab-tuition" class="tab-btn flex-1 py-3 px-4 text-center font-semibold text-gray-600 hover:bg-gray-100 rounded-tl-2xl">
+                Tuition Calculator
+            </button>
+            <button id="tab-cgpa" class="tab-btn flex-1 py-3 px-4 text-center font-semibold text-gray-600 hover:bg-gray-100 rounded-tr-2xl">
+                CGPA Calculator
+            </button>
+        </div>
+
+        <div class="p-6 md:p-8">
+            <!-- Tuition Calculator Content -->
+            <div id="content-tuition" class="tab-content">
+                <div class="text-center mb-6">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">UIU Tuition Fee Calculator</h1>
+                    <p class="text-gray-500 mt-2">Calculate your payment installments.</p>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label for="total-tuition" class="block text-sm font-medium text-gray-700 mb-1">Total Tuition Fee</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">৳</span>
+                            <input type="number" id="total-tuition" placeholder="e.g., 50000" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition">
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                        <button id="calculate-btn-tuition" class="w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-300">Calculate</button>
+                        <button id="reset-btn-tuition" class="w-full bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-300">Reset</button>
+                    </div>
+                </div>
+                <div id="error-message-tuition" class="text-red-500 text-sm mt-4 text-center hidden"></div>
+                <div id="results-tuition" class="mt-6 border-t border-gray-200 pt-6 hidden">
+                    <h2 class="text-xl font-semibold text-center text-gray-800 mb-4">Installment Breakdown</h2>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-orange-50 p-4 rounded-lg"><span class="font-medium text-gray-700">1st Installment (40%)</span><p id="installment1" class="text-lg font-bold text-gray-900"></p></div>
+                        <div class="flex justify-between items-center bg-amber-50 p-4 rounded-lg"><span class="font-medium text-gray-700">2nd Installment (30%)</span><p id="installment2" class="text-lg font-bold text-gray-900"></p></div>
+                        <div class="flex justify-between items-center bg-yellow-50 p-4 rounded-lg"><span class="font-medium text-gray-700">3rd Installment (30%)</span><p id="installment3" class="text-lg font-bold text-gray-900"></p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CGPA Calculator Content -->
+            <div id="content-cgpa" class="tab-content">
+                <div class="text-center mb-6">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">UIU GPA/CGPA Calculator</h1>
+                    <p class="text-gray-500 mt-2">Calculate trimester GPA or new CGPA.</p>
+                </div>
+
+                <!-- Current CGPA Section -->
+                <div class="grid grid-cols-2 gap-4 mb-6 border-b pb-6 border-gray-200">
+                    <div>
+                        <label for="current-cgpa" class="block text-sm font-medium text-gray-700 mb-1">Current CGPA</label>
+                        <input type="number" id="current-cgpa" step="0.01" placeholder="e.g., 3.50" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <div>
+                        <label for="completed-credits" class="block text-sm font-medium text-gray-700 mb-1">Credits Completed</label>
+                        <input type="number" id="completed-credits" step="0.5" placeholder="e.g., 90" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                    </div>
+                </div>
+                
+                <!-- Dynamic Course List -->
+                <div id="course-list" class="space-y-3">
+                    <!-- Course rows will be inserted here by JavaScript -->
+                </div>
+                
+                <!-- Add Course Button -->
+                <div class="mt-4">
+                    <button id="add-course-btn" class="w-full flex items-center justify-center py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 transition">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        Add Course
+                    </button>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
+                    <button id="calculate-btn-cgpa" class="w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-300">Calculate</button>
+                    <button id="reset-btn-cgpa" class="w-full bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-300">Reset</button>
+                </div>
+
+                <div id="error-message-cgpa" class="text-red-500 text-sm mt-4 text-center hidden"></div>
+
+                <!-- CGPA Result Display -->
+                <div id="result-cgpa" class="mt-6 text-center hidden border-t pt-6">
+                    <h3 id="gpa-label" class="text-gray-600 font-medium"></h3>
+                    <p id="cgpa-value" class="text-4xl font-bold text-orange-600"></p>
+                    <div id="trimester-gpa-result" class="mt-1 text-sm text-gray-500"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- General Tab Logic ---
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+
+            function switchTab(targetId) {
+                tabs.forEach(tab => {
+                    tab.classList.toggle('active', tab.id === `tab-${targetId}`);
+                });
+                contents.forEach(content => {
+                    content.classList.toggle('active', content.id === `content-${targetId}`);
+                });
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetId = tab.id.replace('tab-', '');
+                    switchTab(targetId);
+                });
+            });
+
+            // Set initial active tab
+            switchTab('tuition');
+
+            // --- Tuition Calculator Logic ---
+            const totalTuitionInput = document.getElementById('total-tuition');
+            const calculateBtnTuition = document.getElementById('calculate-btn-tuition');
+            const resetBtnTuition = document.getElementById('reset-btn-tuition');
+            const resultsDivTuition = document.getElementById('results-tuition');
+            const errorMessageDivTuition = document.getElementById('error-message-tuition');
+            const installment1El = document.getElementById('installment1');
+            const installment2El = document.getElementById('installment2');
+            const installment3El = document.getElementById('installment3');
+
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('en-BD', { style: 'currency', currency: 'BDT' }).format(amount);
+            }
+
+            function calculateInstallments() {
+                resultsDivTuition.classList.add('hidden');
+                errorMessageDivTuition.classList.add('hidden');
+                const totalTuition = parseFloat(totalTuitionInput.value);
+
+                if (isNaN(totalTuition) || totalTuition <= 0) {
+                    errorMessageDivTuition.textContent = 'Please enter a valid, positive number for the tuition fee.';
+                    errorMessageDivTuition.classList.remove('hidden');
+                    return;
+                }
+
+                installment1El.textContent = formatCurrency(totalTuition * 0.40);
+                installment2El.textContent = formatCurrency(totalTuition * 0.30);
+                installment3El.textContent = formatCurrency(totalTuition * 0.30);
+                resultsDivTuition.classList.remove('hidden');
+            }
+
+            function resetTuitionCalculator() {
+                totalTuitionInput.value = '';
+                resultsDivTuition.classList.add('hidden');
+                errorMessageDivTuition.classList.add('hidden');
+                totalTuitionInput.focus();
+            }
+
+            calculateBtnTuition.addEventListener('click', calculateInstallments);
+            resetBtnTuition.addEventListener('click', resetTuitionCalculator);
+            totalTuitionInput.addEventListener('keypress', (e) => e.key === 'Enter' && calculateInstallments());
+
+            // --- CGPA Calculator Logic ---
+            const courseList = document.getElementById('course-list');
+            const addCourseBtn = document.getElementById('add-course-btn');
+            const calculateBtnCgpa = document.getElementById('calculate-btn-cgpa');
+            const resetBtnCgpa = document.getElementById('reset-btn-cgpa');
+            const resultCgpaDiv = document.getElementById('result-cgpa');
+            const gpaLabelEl = document.getElementById('gpa-label');
+            const cgpaValueEl = document.getElementById('cgpa-value');
+            const trimesterGpaResultEl = document.getElementById('trimester-gpa-result');
+            const errorMessageDivCgpa = document.getElementById('error-message-cgpa');
+            const currentCgpaInput = document.getElementById('current-cgpa');
+            const completedCreditsInput = document.getElementById('completed-credits');
+
+            const gradePoints = { 'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7, 'C+': 2.3, 'C': 2.0, 'D': 1.0, 'F': 0.0 };
+
+            function createCourseRow() {
+                const row = document.createElement('div');
+                row.className = 'course-row bg-gray-50 p-3 rounded-lg space-y-3';
+                
+                const gradeOptions = Object.keys(gradePoints).map(grade => `<option value="${gradePoints[grade]}">${grade}</option>`).join('');
+                const previousGradeOptions = `<option value="" disabled selected>Old Grade</option>` + gradeOptions;
+
+                row.innerHTML = `
+                    <div class="grid grid-cols-12 gap-2 items-center">
+                        <div class="col-span-6">
+                             <input type="number" step="0.5" class="course-credit w-full p-2 border border-gray-300 rounded-lg" placeholder="Credit">
+                        </div>
+                        <div class="col-span-5">
+                            <select class="course-grade w-full p-2 border border-gray-300 rounded-lg bg-white">
+                                ${gradeOptions}
+                            </select>
+                        </div>
+                        <div class="col-span-1 text-right">
+                            <button class="remove-course-btn text-gray-400 hover:text-red-500 transition p-1">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input type="checkbox" class="retake-checkbox h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+                            <label class="ml-2 text-sm text-gray-600">Retake?</label>
+                        </div>
+                        <div class="previous-grade-container hidden">
+                            <select class="previous-grade p-1 border border-gray-300 rounded-lg bg-white text-sm">
+                                ${previousGradeOptions}
+                            </select>
+                        </div>
+                    </div>
+                `;
+                courseList.appendChild(row);
+
+                const retakeCheckbox = row.querySelector('.retake-checkbox');
+                const previousGradeContainer = row.querySelector('.previous-grade-container');
+                retakeCheckbox.addEventListener('change', () => {
+                    previousGradeContainer.classList.toggle('hidden', !retakeCheckbox.checked);
+                });
+
+                row.querySelector('.remove-course-btn').addEventListener('click', () => row.remove());
+            }
+
+            addCourseBtn.addEventListener('click', createCourseRow);
+
+            function resetCgpaCalculator() {
+                courseList.innerHTML = '';
+                currentCgpaInput.value = '';
+                completedCreditsInput.value = '';
+                createCourseRow();
+                resultCgpaDiv.classList.add('hidden');
+                errorMessageDivCgpa.classList.add('hidden');
+            }
+            
+            resetBtnCgpa.addEventListener('click', resetCgpaCalculator);
+
+            function calculateCgpa() {
+                resultCgpaDiv.classList.add('hidden');
+                errorMessageDivCgpa.classList.add('hidden');
+                
+                let previousCgpa = parseFloat(currentCgpaInput.value);
+                let previousCredits = parseFloat(completedCreditsInput.value);
+
+                if ((isNaN(previousCgpa) && !isNaN(previousCredits)) || (!isNaN(previousCgpa) && isNaN(previousCredits))) {
+                    errorMessageDivCgpa.textContent = 'Please fill both Current CGPA and Credits Completed, or leave both empty.';
+                    errorMessageDivCgpa.classList.remove('hidden');
+                    return;
+                }
+                if (isNaN(previousCgpa)) previousCgpa = 0;
+                if (isNaN(previousCredits)) previousCredits = 0;
+
+                if (previousCgpa < 0 || previousCgpa > 4.0 || previousCredits < 0) {
+                    errorMessageDivCgpa.textContent = 'Please enter valid previous CGPA and credit values.';
+                    errorMessageDivCgpa.classList.remove('hidden');
+                    return;
+                }
+
+                let totalWeightedPoints = previousCgpa * previousCredits;
+                let totalCredits = previousCredits;
+                let trimesterTotalCredits = 0;
+                let trimesterWeightedPoints = 0;
+                let isValid = true;
+                const courseRows = document.querySelectorAll('.course-row');
+
+                if (courseRows.length === 0) {
+                    errorMessageDivCgpa.textContent = 'Please add at least one course.';
+                    errorMessageDivCgpa.classList.remove('hidden');
+                    return;
+                }
+
+                for (const row of courseRows) {
+                    const creditInput = row.querySelector('.course-credit');
+                    const gradeSelect = row.querySelector('.course-grade');
+                    const retakeCheckbox = row.querySelector('.retake-checkbox');
+                    
+                    creditInput.classList.remove('border-red-500');
+
+                    const credit = parseFloat(creditInput.value);
+                    const newGradePoint = parseFloat(gradeSelect.value);
+
+                    if (isNaN(credit) || credit <= 0) {
+                        creditInput.classList.add('border-red-500');
+                        isValid = false;
+                        continue;
+                    }
+
+                    trimesterTotalCredits += credit;
+                    trimesterWeightedPoints += credit * newGradePoint;
+
+                    if (retakeCheckbox.checked) {
+                        const previousGradeSelect = row.querySelector('.previous-grade');
+                        previousGradeSelect.classList.remove('border-red-500');
+                        const previousGradePoint = parseFloat(previousGradeSelect.value);
+
+                        if (isNaN(previousGradePoint)) {
+                            previousGradeSelect.classList.add('border-red-500');
+                            isValid = false;
+                            continue;
+                        }
+                        
+                        totalWeightedPoints += (newGradePoint * credit) - (previousGradePoint * credit);
+                    } else {
+                        totalCredits += credit;
+                        totalWeightedPoints += newGradePoint * credit;
+                    }
+                }
+
+                if (!isValid) {
+                    errorMessageDivCgpa.textContent = 'Please fill all fields correctly for each course.';
+                    errorMessageDivCgpa.classList.remove('hidden');
+                    return;
+                }
+                
+                const trimesterGpa = (trimesterTotalCredits > 0) ? (trimesterWeightedPoints / trimesterTotalCredits) : 0;
+                const newCgpa = (totalCredits > 0) ? (totalWeightedPoints / totalCredits) : 0;
+
+                if (previousCredits > 0) {
+                    gpaLabelEl.textContent = 'New CGPA';
+                    cgpaValueEl.textContent = newCgpa.toFixed(2);
+                    trimesterGpaResultEl.textContent = `(Trimester GPA: ${trimesterGpa.toFixed(2)})`;
+                } else {
+                    gpaLabelEl.textContent = 'Trimester GPA';
+                    cgpaValueEl.textContent = trimesterGpa.toFixed(2);
+                    trimesterGpaResultEl.textContent = '';
+                }
+
+                resultCgpaDiv.classList.remove('hidden');
+            }
+
+            calculateBtnCgpa.addEventListener('click', calculateCgpa);
+
+            // Initialize with one course row
+            createCourseRow();
+        });
+    </script>
+</body>
+</html>
+
